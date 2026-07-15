@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from aiohttp import web
 
 from bot.factory import create_bot, create_dispatcher
 from database.base import init_db
@@ -15,6 +16,23 @@ async def set_bot_commands(bot) -> None:
     ]
     await bot.set_my_commands(commands)
 
+
+# 1. Render talab qiladigan portni tinglash uchun kichik soxta veb-sahifa
+async def handle(request):
+    return web.Response(text="Bot is running smoothly on Render!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get('/', handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    
+    # Render avtomatik ravishda PORT muhit o'zgaruvchisini beradi.
+    # Agar u bo'lmasa, mahalliy kompyuterda 8000-portda ishlaydi.
+    port = int(os.environ.get("PORT", 8000))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logging.info(f"Web server successfully started on port {port}")
 
 async def main() -> None:
     logging.basicConfig(
