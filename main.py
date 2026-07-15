@@ -1,3 +1,4 @@
+import os  # <-- BU JUDA MUHIM, PORTni olish uchun kerak!
 import asyncio
 import logging
 import sys
@@ -8,7 +9,7 @@ from database.base import init_db
 from aiogram.types import BotCommand
 
 
-# Buyruqlar menyusini o'rnatuvchi yordamchi funksiya (main tashqarisida yozish chiroyliroq)
+# Buyruqlar menyusini o'rnatuvchi yordamchi funksiya
 async def set_bot_commands(bot) -> None:
     commands = [
         BotCommand(command="start", description="Botni ishga tushirish"),
@@ -28,7 +29,6 @@ async def start_web_server():
     await runner.setup()
     
     # Render avtomatik ravishda PORT muhit o'zgaruvchisini beradi.
-    # Agar u bo'lmasa, mahalliy kompyuterda 8000-portda ishlaydi.
     port = int(os.environ.get("PORT", 8000))
     site = web.TCPSite(runner, '0.0.0.0', port)
     await site.start()
@@ -41,6 +41,12 @@ async def main() -> None:
         stream=sys.stdout,
     )
 
+    # ==========================================
+    # 🔥 MANA SHU QATORNI QO'SHDIK!
+    # Web serverni asinxron fonda ishga tushiramiz:
+    asyncio.create_task(start_web_server())
+    # ==========================================
+
     # 1. Ma'lumotlar bazasini ishga tushiramiz
     await init_db()
 
@@ -48,7 +54,7 @@ async def main() -> None:
     bot = create_bot()
     dp = create_dispatcher()
 
-    # 3. ENG MUHIM QISM: Buyruqlar menyusini Telegramga yuklaymiz!
+    # 3. Buyruqlar menyusini Telegramga yuklaymiz
     await set_bot_commands(bot)
 
     logging.info("Bot started")
